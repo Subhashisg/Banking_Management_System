@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Management System</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            background: url('https://images.unsplash.com/photo-1561414927-6d86591d0c4f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.3); 
+        }
+        .form-group { margin: 20px 0; }
+        h1, h3 { color: #2c3e50; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { 
+            padding: 8px 15px; 
+            margin: 5px; 
+            background-color: #2ecc71; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { background-color: #27ae60; }
+        #result { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            background-color: #ecf0f1; 
+        }
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #auth-box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-overlay">
+        <div id="auth-box">
+            <h3>Admin Authentication</h3>
+            <input type="password" id="adminPass" placeholder="Enter Admin Password">
+            <button onclick="checkPassword()">Login</button>
+            <div id="auth-error" style="color: red;"></div>
+        </div>
+    </div>
+
+    <div class="container" id="main-content" style="display: none;">
+        <h1>Bank Management System</h1>
+        
+        <div class="form-group">
+            <h3>Create Account</h3>
+            <input type="text" id="name" placeholder="Account Holder Name">
+            <input type="number" id="initialBalance" placeholder="Initial Balance" step="0.01">
+            <button onclick="createAccount()">Create</button>
+        </div>
+
+        <div class="form-group">
+            <h3>Manage Account</h3>
+            <input type="number" id="accNum" placeholder="Account Number">
+            <input type="number" id="amount" placeholder="Amount" step="0.01">
+            <button onclick="deposit()">Deposit</button>
+            <button onclick="withdraw()">Withdraw</button>
+            <button onclick="remove()">Remove</button>
+        </div>
+
+        <div class="form-group">
+            <a href="http://localhost:3000/?action=view" target="_blank">
+                <button>View All Accounts</button>
+            </a>
+            <a href="http://localhost:3000/?action=transactions" target="_blank">
+                <button>View Transaction History</button>
+            </a>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "1234";
+
+        function checkPassword() {
+            const enteredPass = document.getElementById('adminPass').value;
+            if (enteredPass === ADMIN_PASSWORD) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                document.getElementById('auth-error').innerHTML = 'Incorrect password!';
+            }
+        }
+
+        document.getElementById('adminPass').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        function sendRequest(action, params) {
+            let url = `http://localhost:3000/?action=${action}`;
+            for (let key in params) {
+                url += `&${key}=${encodeURIComponent(params[key])}`;
+            }
+            
+            return fetch(url, { method: 'GET', mode: 'cors' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById('result').innerHTML = data;
+                    return data;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                    console.error('Fetch error:', error);
+                    throw error;
+                });
+        }
+
+        function createAccount() {
+            const name = document.getElementById('name').value.trim();
+            const amount = parseFloat(document.getElementById('initialBalance').value);
+            if (!name || isNaN(amount) || amount < 0) {
+                document.getElementById('result').innerHTML = 'Please enter a valid name and amount!';
+                return;
+            }
+            sendRequest('create', { name, amount });
+        }
+
+        function deposit() {
+            const accNum = parseInt(document.getElementById('accNum').value);
+            const amount = parseFloat(document.getElementById('amount').value);
+            if (isNaN(accNum) || isNaN(amount) || amount <= 0) {
+                document.getElementById('result').innerHTML = 'Please enter valid account number and amount!';
+                return;
+            }
+            sendRequest('deposit', { accNum, amount });
+        }
+
+        function withdraw() {
+            const accNum = parseInt(document.getElementById('accNum').value);
+            const amount = parseFloat(document.getElementById('amount').value);
+            if (isNaN(accNum) || isNaN(amount) || amount <= 0) {
+                document.getElementById('result').innerHTML = 'Please enter valid account number and amount!';
+                return;
+            }
+            sendRequest('withdraw', { accNum, amount });
+        }
+
+        function remove() {
+            const accNum = parseInt(document.getElementById('accNum').value);
+            if (isNaN(accNum)) {
+                document.getElementById('result').innerHTML = 'Please enter a valid account number!';
+                return;
+            }
+            sendRequest('remove', { accNum });
+        }
+    </script>
+</body>
+</html>
