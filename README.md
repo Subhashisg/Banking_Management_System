@@ -5,6 +5,7 @@
 
 A simple yet efficient Banking Management System designed to handle core banking operations such as account creation, deposits, withdrawals, and transaction tracking.
 
+https://www.canva.com/design/DAGiPsXFJW8/9vJW12fyux49IIgtblWcFg/view?utm_content=DAGiPsXFJW8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb5951f1a5c
 ## Overview
 
 The **Banking Management System** is a software solution developed to simulate real-world banking operations. It provides a user-friendly interface for administrators to manage customer accounts, process transactions, and view account details and transaction histories. The system ensures data integrity and includes basic security features like admin authentication.
